@@ -15,6 +15,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/rtsp/StreamEncoder.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/rtsp/testOnDemandRTSPServer.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/rtsp/RTSP.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/rtsp/demo.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/rgb2yuv/rgb2yuv.cpp
 )
 # opencv
 find_package(OpenCV REQUIRED)

@@ -10,6 +10,7 @@
 #include <sys/time.h>
 #include <queue>
 #include "include/RTSP.hh"
+#include "../rgb2yuv/rgb2yuv.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -65,6 +66,11 @@ inline void RTSPFramedSource::convernt_to_OutputBuffer(void)
 		memset(tmp.data+line_size*white_pos++, 255,line_size);
 #endif
 
+	unsigned char *frame_nv12 = NULL;
+	frame_nv12 = (unsigned char *)malloc(frame_size);
+	if (!frame_nv12)
+		return;
+#ifdef USE_RGA
 	RockchipRga *rga;
 	rga = RgaCreate();
 	if (!rga) {
@@ -74,17 +80,12 @@ inline void RTSPFramedSource::convernt_to_OutputBuffer(void)
 	// std::cout << "convernt_to_OutputBuffer!\n" << std::endl;
 	rga->ops->initCtx(rga); 
 	rga->ops->setRotate(rga, RGA_ROTATE_NONE);
-	rga->ops->setSrcFormat(rga, V4L2_PIX_FMT_YUYV, 640, 480);
+	// rga->ops->setSrcFormat(rga, V4L2_PIX_FMT_YUYV, 640, 480);
 	// rga->ops->setSrcFormat(rga, V4L2_PIX_FMT_YUYV, 640, 480);//推YUYV，v4l2
 	rga->ops->setSrcFormat(rga, V4L2_PIX_FMT_RGB24, 640, 480);//推mat
 	rga->ops->setDstFormat(rga, V4L2_PIX_FMT_NV12, 640, 480);
+	// cv::imwrite("../1.jpg",tmp);
 
-	
-	unsigned char *frame_nv12 = NULL;
-	
-	frame_nv12 = (unsigned char *)malloc(frame_size);
-	if (!frame_nv12)
-		return;
 	rga->ops->setDstBufferPtr(rga, frame_nv12);
 	// rga->ops->setSrcBufferPtr(rga, (unsigned char *) camera_buffers[index].start);//推v4l2
 	// rga->ops->setSrcBufferPtr(rga, (unsigned char *)fOutputBuffer);//推YUYV
@@ -94,15 +95,17 @@ inline void RTSPFramedSource::convernt_to_OutputBuffer(void)
 	{
 		printf("rga->ops->go fail! \n");
 	}
-  	else
-  	{
-    		//转换完成
-			memcpy(fOutputBuffer, frame_nv12, frame_size);
-    		fOutputBuffer += frame_size;
-    		fTotOfFrameToSend++;
-  	}
-	free(frame_nv12);
 	RgaDestroy(rga);
+	#else
+	Rgb2YUV r2y;
+	r2y.RGB2YUV420((unsigned char *)tmp.data,frame_nv12,640,480);
+	#endif
+
+	memcpy(fOutputBuffer, frame_nv12, frame_size);
+	fOutputBuffer += frame_size;
+	fTotOfFrameToSend++;
+  	
+	free(frame_nv12);
 }
 
 void RTSPFramedSource::doGetNextFrame()

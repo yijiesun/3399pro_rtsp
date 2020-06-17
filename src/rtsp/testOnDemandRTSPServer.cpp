@@ -24,7 +24,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>  
 #include <iostream>
 using namespace std;
-
+// #define ACCESS_CONTROL
 
 unsigned long rtsp_process::get_time(void)
 {
@@ -43,7 +43,7 @@ void rtsp_process::init()
   #ifdef ACCESS_CONTROL
     // To implement client access control to the RTSP server, do the following:
     authDB = new UserAuthenticationDatabase;
-    authDB->addUserRecord("username1", "password1"); // replace these with real strings
+    authDB->addUserRecord("admin", "1234"); // replace these with real strings
     // Repeat the above with each <username>, <password> that you wish to allow
     // access to the server.
   #endif
@@ -64,7 +64,7 @@ void rtsp_process::init()
     // "ServerMediaSubsession" objects for each audio/video substream.
     // A H.264 video elementary stream:
     {
-      char const* streamName = "h264ESVideoTest";
+      char const* streamName = "stream";
       char const* inputFileName = "test.264";
       ServerMediaSession* sms
         = ServerMediaSession::createNew(*env, streamName, streamName,
